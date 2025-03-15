@@ -25,7 +25,7 @@ def create_user(username='user@example.com', password=PASSWORD): # new
 class HttpMenuTest(APITestCase):
     def setUp(self):
         user = create_user()
-        response = self.client.post(reverse('log_in'), data={
+        response = self.client.post(reverse('users:login'), data={
             'username': user.username,
             'password': PASSWORD,
         })

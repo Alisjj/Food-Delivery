@@ -67,12 +67,37 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'email_verified')
 
 
+
 class LoginSerializer(TokenObtainPairSerializer):
+    # Override the validate method to check email verification
+    def validate(self, attrs):
+        # This calls the parent validate method which authenticates credentials
+        data = super().validate(attrs)
+        
+        # Now check if the user is verified
+        if not self.user.email_verified:
+            raise serializers.ValidationError(
+                {"detail": "Please verify your email address before logging in."}
+            )
+        
+        # Add user data to the response
+        data['user'] = {
+            'id': str(self.user.id),
+            'username': self.user.username,
+            'email': self.user.email,
+            'delivery_location': self.user.delivery_location,
+            'delivery_latitude': self.user.delivery_latitude,
+            'delivery_longitude': self.user.delivery_longitude
+        }
+            
+        return data
+    
     @classmethod
     def get_token(cls, user):
+        # Get the token from the parent class
         token = super().get_token(user)
         
-        # Add essential user data to token
+        # Add user data to the token payload
         token['username'] = user.username
         token['email'] = user.email
         token['email_verified'] = user.email_verified
@@ -108,7 +133,35 @@ class EmailVerificationSerializer(serializers.Serializer):
         self.user.verification_token_expires = None
         self.user.save()
         return self.user
+
+class ResendVerificationEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
     
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+            if user.email_verified:
+                raise serializers.ValidationError("This email is already verified.")
+            self.user = user
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("No account found with this email address.")
+    
+    def save(self):
+        # Generate new verification token
+        self.user.verification_token = get_random_string(64)
+        self.user.verification_token_expires = timezone.now() + timedelta(days=1)
+        self.user.save()
+        
+        # Send verification email
+        verification_url = f"{settings.FRONTEND_URL}/verify-email/{self.user.verification_token}"
+        subject = "Verify your email address"
+        message = f"Please click the link to verify your email: {verification_url}"
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [self.user.email]
+        
+        send_mail(subject, message, from_email, recipient_list)
+        return self.user    
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()

@@ -1,7 +1,7 @@
 from pathlib import Path
 import datetime
 import os
-# from celery.schedules import crontab
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,25 +85,15 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'id',
 }
 
-# CELERY_BEAT_SCHEDULE = {
-#     "sample_task": {
-#         "task": "core.tasks.sample_task",
-#         "schedule": crontab(minute="*/1"),
-#     },
-# }
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
 
 # CELERY_BEAT_SCHEDULE = {
-#     "sample_task": {
-#         "task": "core.tasks.sample_task",
-#         "schedule": crontab(minute="*/1"),
-#     },
-#     "send_email_report": {
-#         "task": "core.tasks.send_email_report",
-#         "schedule": crontab(hour="*/1"),
-#     },
+#     "update_order": {
+#         "task": "orders.tasks.update_order_status",
+#         "schedule": crontab(minute="*/15"),
+#     }
 # }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

@@ -57,7 +57,10 @@ class OrderViewSet(viewsets.ModelViewSet):
     def history(self, request):
         orders = Order.objects.filter(user=request.user).order_by('-order_time')
         page = self.paginate_queryset(orders)
-
+        
+        # Using select_related to efficiently fetch     restaurant data in a single query
+        orders = orders.select_related('restaurant')
+        
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
