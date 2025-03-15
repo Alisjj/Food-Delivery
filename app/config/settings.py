@@ -108,6 +108,7 @@ CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "noreply@email.com"
+FRONTEND_URL = "http://localhost:8000"
 
 
 # Password validation
