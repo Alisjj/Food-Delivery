@@ -69,9 +69,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(TokenObtainPairSerializer):
-    # Override the validate method to check email verification
     def validate(self, attrs):
-        # This calls the parent validate method which authenticates credentials
         data = super().validate(attrs)
         
         # Now check if the user is verified
@@ -94,15 +92,12 @@ class LoginSerializer(TokenObtainPairSerializer):
     
     @classmethod
     def get_token(cls, user):
-        # Get the token from the parent class
         token = super().get_token(user)
         
-        # Add user data to the token payload
         token['username'] = user.username
         token['email'] = user.email
         token['email_verified'] = user.email_verified
         
-        # Only include location data if available
         if user.delivery_location:
             token['delivery_location'] = user.delivery_location
             token['delivery_latitude'] = user.delivery_latitude
