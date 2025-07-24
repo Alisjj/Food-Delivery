@@ -35,7 +35,6 @@ class Restaurant(models.Model):
     @classmethod
     def find_nearest_available(cls, latitude, longitude):
         """Find nearest available restaurant based on coordinates"""
-        # Get restaurants that are available (next_available_time is None or in the past)
         current_time = timezone.now()
         available_restaurants = cls.objects.filter(
             models.Q(busy_until__isnull=True) | 
@@ -45,13 +44,10 @@ class Restaurant(models.Model):
         if not available_restaurants:
             return None
             
-        # Simple distance calculation (not accurate for long distances)
         nearest = None
         min_distance = float('inf')
         
         for restaurant in available_restaurants:
-            # Euclidean distance - not accurate for geographic coordinates
-            # but sufficient for demonstration purposes
             distance = ((float(restaurant.latitude) - float(latitude)) ** 2 + 
                        (float(restaurant.longitude) - float(longitude)) ** 2) ** 0.5
             
@@ -91,7 +87,6 @@ class Courier(models.Model):
         self.busy_until = None
         self.save()
     
-    # def get_ab
     
 
 
